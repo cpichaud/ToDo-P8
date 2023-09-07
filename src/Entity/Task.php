@@ -25,10 +25,8 @@ class Task
     #[ORM\Column]
     private ?bool $isDone = null;
 
-        /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="tasks")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
-     */
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "tasks")]
+    #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id")]
     private $user;
 
     // ...
