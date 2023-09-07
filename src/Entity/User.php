@@ -30,9 +30,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Task::class, mappedBy="user")
-     */
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: "user")]
     private $tasks;
 
     public function __construct()
