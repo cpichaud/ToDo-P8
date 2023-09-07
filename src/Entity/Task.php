@@ -25,6 +25,25 @@ class Task
     #[ORM\Column]
     private ?bool $isDone = null;
 
+        /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="tasks")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     */
+    private $user;
+
+    // ...
+
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    public function setUser($user)
+    {
+        $this->user = $user;
+        return $this;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
