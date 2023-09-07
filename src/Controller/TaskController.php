@@ -4,15 +4,24 @@ namespace App\Controller;
 
 use App\Entity\Task;
 use App\Form\TaskType;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 class TaskController extends AbstractController
 {
+
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
     /**
-     * @Route("/tasks", name="task_list")
+     * @Route("/", name="task_list")
      */
     public function listAction(): Response
     {
@@ -32,7 +41,7 @@ class TaskController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-
+            $task->setIsDone(false);
             $em->persist($task);
             $em->flush();
 
@@ -47,14 +56,20 @@ class TaskController extends AbstractController
     /**
      * @Route("/tasks/{id}/edit", name="task_edit")
      */
-    public function editAction(Task $task, Request $request): Response
+    public function editAction(int $id, Request $request): Response
     {
+        $task = $this->entityManager->getRepository(Task::class)->find($id);
+
+        if (!$task) {
+            throw $this->createNotFoundException('Tâche non trouvée');
+        }
+
         $form = $this->createForm(TaskType::class, $task);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $this->entityManager->flush();
 
             $this->addFlash('success', 'La tâche a bien été modifiée.');
 
@@ -70,24 +85,36 @@ class TaskController extends AbstractController
     /**
      * @Route("/tasks/{id}/toggle", name="task_toggle")
      */
-    public function toggleTaskAction(Task $task): Response
+    public function toggleTaskAction(int $id): Response
     {
+        $task = $this->entityManager->getRepository(Task::class)->find($id);
+
+        if (!$task) {
+            throw $this->createNotFoundException('Tâche non trouvée');
+        }
+
         $task->toggle(!$task->isDone());
-        $this->getDoctrine()->getManager()->flush();
+        $this->entityManager->flush();
 
         $this->addFlash('success', sprintf('La tâche %s a bien été marquée comme faite.', $task->getTitle()));
 
         return $this->redirectToRoute('task_list');
     }
 
+
     /**
      * @Route("/tasks/{id}/delete", name="task_delete")
      */
-    public function deleteTaskAction(Task $task): Response
+    public function deleteTaskAction(int $id): Response
     {
-        $em = $this->getDoctrine()->getManager();
-        $em->remove($task);
-        $em->flush();
+        $task = $this->entityManager->getRepository(Task::class)->find($id);
+
+        if (!$task) {
+            throw $this->createNotFoundException('Tâche non trouvée');
+        }
+
+        $this->entityManager->remove($task);
+        $this->entityManager->flush();
 
         $this->addFlash('success', 'La tâche a bien été supprimée.');
 
