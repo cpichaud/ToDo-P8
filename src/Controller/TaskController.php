@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class TaskController extends AbstractController
 {
@@ -107,17 +109,36 @@ class TaskController extends AbstractController
      */
     public function deleteTaskAction(int $id): Response
     {
-        $task = $this->entityManager->getRepository(Task::class)->find($id);
-
-        if (!$task) {
-            throw $this->createNotFoundException('Tâche non trouvée');
+        try {
+            $currentUser = $this->getUser();
+            if (!$currentUser) {
+                throw new AccessDeniedException('Vous devez être connecté pour accéder à cette fonctionnalité.');
+            }
+            
+            $task = $this->entityManager->getRepository(Task::class)->find($id);
+    
+            if (!$task) {
+                throw $this->createNotFoundException('Tâche non trouvée');
+            }
+    
+            if ($task->getUser() === 'anonyme' && !$currentUser->hasRole('ROLE_ADMIN')) {
+                throw new AccessDeniedException('Seul un administrateur peut supprimer cette tâche.');
+            }
+            if ($currentUser !== $task->getUser() && !$currentUser->hasRole('ROLE_ADMIN')) {
+                throw new AccessDeniedException('Vous ne pouvez pas supprimer cette tâche.');
+            }
+    
+            $this->entityManager->remove($task);
+            $this->entityManager->flush();
+    
+            $this->addFlash('success', 'La tâche a bien été supprimée.');
+    
+            return $this->redirectToRoute('task_list');
+        } catch (AuthenticationException $e) {
+            $this->addFlash('error', 'Vous devez être connecté pour accéder à cette fonctionnalité.');
+            return $this->redirectToRoute('login_route_name');
         }
-
-        $this->entityManager->remove($task);
-        $this->entityManager->flush();
-
-        $this->addFlash('success', 'La tâche a bien été supprimée.');
-
-        return $this->redirectToRoute('task_list');
+        
+      
     }
 }

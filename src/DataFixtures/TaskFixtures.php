@@ -30,8 +30,7 @@ class TaskFixtures extends Fixture implements DependentFixtureInterface
         ];
 
         // Récupérer tous les utilisateurs
-        $users = $manager->getRepository(User::class)->findAll();
-        dump($users);       
+        $users = $manager->getRepository(User::class)->findAll();     
 
         for ($i = 0; $i < 10; $i++) {
             $task = new Task();

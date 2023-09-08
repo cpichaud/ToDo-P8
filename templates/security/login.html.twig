@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Se connecter{% endblock %}
+
+{% block body %}
+    <h1>Se connecter</h1>
+
+    {% if error %}
+        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    <form action="{{ path('app_login') }}" method="post">
+        <label for="username">E-mail:</label>
+        <input type="text" id="username" name="_username" value="{{ last_username }}" required="required" />
+
+        <label for="password">Mot de passe:</label>
+        <input type="password" id="password" name="_password" required="required" />
+
+        <input type="hidden" name="_csrf_token"
+            value="{{ csrf_token('authenticate') }}"
+        >
+
+        <button type="submit">Connexion</button>
+    </form>
+{% endblock %}
