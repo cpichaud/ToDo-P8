@@ -131,4 +131,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
+    /**
+     * Check if the user has a specific role.
+     *
+     * @param string $role The role to check for.
+     *
+     * @return bool True if the user has the role, false otherwise.
+     */
+    public function hasRole(string $role): bool
+    {
+        return in_array($role, $this->getRoles(), true);
+    }
+
 }
