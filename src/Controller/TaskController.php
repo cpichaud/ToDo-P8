@@ -121,9 +121,7 @@ class TaskController extends AbstractController
                 throw $this->createNotFoundException('Tâche non trouvée');
             }
     
-            if ($task->getUser() === 'anonyme' && !$currentUser->hasRole('ROLE_ADMIN')) {
-                throw new AccessDeniedException('Seul un administrateur peut supprimer cette tâche.');
-            }
+            
             if ($currentUser !== $task->getUser() && !$currentUser->hasRole('ROLE_ADMIN')) {
                 throw new AccessDeniedException('Vous ne pouvez pas supprimer cette tâche.');
             }
