@@ -2,17 +2,23 @@
 
 {% block header_img %}{% endblock %}
 
-{% block header_title %}<h1>Liste des utilisateurs</h1>{% endblock %}
+{% block header_title %}
+    <div class="container mt-4">
+        <h1 class="text-center">Liste des utilisateurs</h1>
+    </div>
+{% endblock %}
 
 {% block body %}
-    {% if users|length == 0 %}
-        <div class="alert alert-warning" role="alert">
-            Il n'y a pas encore d'utilisateur enregistré. <a href="{{ path('user_create') }}" class="btn btn-warning pull-right">Créer un utilisateur</a>
-        </div>
-    {% else %}
-        <div class="row">
-            <table class="table">
-                <thead>
+    <div class="container mt-4">
+        <h4>Liste des utilisateurs</h4>
+        {% if users|length == 0 %}
+            <div class="alert alert-warning" role="alert">
+                Il n'y a pas encore d'utilisateur enregistré. 
+                <a href="{{ path('user_create') }}" class="btn btn-warning pull-right">Créer un utilisateur</a>
+            </div>
+        {% else %}
+            <table class="table table-bordered table-hover">
+                <thead class="thead-light">
                 <tr>
                     <th>#</th>
                     <th>Nom d'utilisateur</th>
@@ -33,6 +39,6 @@
                 {% endfor %}
                 </tbody>
             </table>
-        </div>
-    {% endif %}
+        {% endif %}
+    </div>
 {% endblock %}
