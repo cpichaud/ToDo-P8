@@ -3,23 +3,29 @@
 {% block title %}Se connecter{% endblock %}
 
 {% block body %}
-    <h1>Se connecter</h1>
+    <section class="login">
+        <div class="form-group m-4">
+            <h1>Se connecter</h1>
 
-    {% if error %}
-        <div class="alert alert-danger">{{ error }}</div>
-    {% endif %}
+            {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
 
-    <form action="{{ path('app_login') }}" method="post">
-        <label for="username">E-mail:</label>
-        <input type="text" id="username" name="_username" value="{{ last_username }}" required="required" />
+            <form action="{{ path('app_login') }}" method="post">
+                    <div class="input-group flex-nowrap mt-2">
+                        <span class="input-group-text" id="basic-addon1">E-mail</span>
+                        <input type="text" id="username" name="_username" value="{{ last_username }}" required="required" class="form-control" aria-describedby="addon-wrapping"/>
+                    </div>
 
-        <label for="password">Mot de passe:</label>
-        <input type="password" id="password" name="_password" required="required" />
+                    <div class="input-group flex-nowrap mt-2">
+                        <span class="input-group-text" id="basic-addon1">Mot de passe</span>
+                        <input type="password" id="password" name="_password" required="required" class="form-control" aria-describedby="addon-wrapping"/>
+                    </div>
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-        <input type="hidden" name="_csrf_token"
-            value="{{ csrf_token('authenticate') }}"
-        >
-
-        <button type="submit">Connexion</button>
-    </form>
+                    <button type="submit" class="btn btn-light mt-2">Connexion</button>
+                
+            </form>
+        </div>
+    </section>
 {% endblock %}

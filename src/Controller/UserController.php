@@ -33,31 +33,31 @@ class UserController extends AbstractController
         return $this->render('user/list.html.twig', ['users' => $users]);
     }
 
-    // /**
-    //  * @Route("/users/create", name="user_create")
-    //  */
-    // public function createAction(Request $request): Response
-    // {
-    //     $user = new User();
-    //     $form = $this->createForm(UserType::class, $user);
-    //     $form->handleRequest($request);
+    /**
+     * @Route("/users/create", name="user_create")
+     */
+    public function createAction(Request $request): Response
+    {
+        $user = new User();
+        $form = $this->createForm(UserType::class, $user);
+        $form->handleRequest($request);
 
-    //     if ($form->isSubmitted() && $form->isValid()) {
-    //         $password = $this->passwordEncoder->encodePassword($user, $user->getPassword());
-    //         $user->setPassword($password);
-    //         // dump($user->getRoles());
-    //         // die();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $password = $this->passwordEncoder->encodePassword($user, $user->getPassword());
+            $user->setPassword($password);
+            // dump($user->getRoles());
+            // die();
 
-    //         $this->entityManager->persist($user);
-    //         $this->entityManager->flush();
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
 
-    //         $this->addFlash('success', "L'utilisateur a bien été ajouté.");
+            $this->addFlash('success', "L'utilisateur a bien été ajouté.");
 
-    //         return $this->redirectToRoute('user_list');
-    //     }
+            return $this->redirectToRoute('user_list');
+        }
 
-    //     return $this->render('user/create.html.twig', ['form' => $form->createView()]);
-    // }
+        return $this->render('user/create.html.twig', ['form' => $form->createView()]);
+    }
 
    /**
  * @Route("/users/{id}/edit", name="user_edit")
