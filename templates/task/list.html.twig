@@ -7,6 +7,14 @@
     <div>
         <a href="{{ path('task_create') }}" class="btn btn-dark pull-right m-4">Créer une tâche</a>
     </div>
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
     <div class="row m-3">
         {% for task in tasks %}
         <div class="col-sm-4 col-lg-4 col-md-4">
