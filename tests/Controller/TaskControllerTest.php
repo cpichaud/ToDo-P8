@@ -23,6 +23,19 @@ class TaskControllerTest extends WebTestCase
         $form = $crawler->selectButton('Connexion')->form();
         $this->client->submit($form, ['_username' => $username, '_password' => $password]);
     }
+    public function logoutUser(): void
+    {
+        $this->client->request('GET', '/logout'); 
+    }
+
+    // public function testDisplayLoginPage()
+    // {
+    //     $this->logoutUser();  // Assurez-vous que l'utilisateur est déconnecté.
+    //     $crawler = $this->client->request('GET', '/login');
+    //     dump($this->client->getResponse()->getContent());  // Ajoutez cette ligne
+    //     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+    //     $this->assertSelectorTextContains('button', 'Connexion');
+    // }
     
     
     public function testListTask()
@@ -55,17 +68,29 @@ class TaskControllerTest extends WebTestCase
         // $redirectUrl = $this->client->getResponse()->headers->get('Location');
         // var_dump($redirectUrl);
         // preg_match('/\/tasks\/(\d+)\/edit/', $redirectUrl, $matches);
-        // $this->createdTaskId = $matches[1];
+        // $this->createdTaskId = $matches[1];  $taskRepository = static::$container->get(TaskRepository::class);
+        // $taskRepository = static::$container->get(TaskRepository::class);
+        // $createdTask = $taskRepository->findOneBy(['title' => 'test']);  // Vous pouvez utiliser d'autres critères si nécessaire
+        // $this->createdTaskId = $createdTask->getId();
+    }
+
+    public function testDeleteTask()
+    {
+        $this->loginUser();  // Authentifiez-vous en tant qu'admin ou l'utilisateur qui a créé la tâche
+
+        // Supprimez la tâche
+        $this->client->request('GET', '/tasks/65/delete');
+        $this->assertEquals(302, $this->client->getResponse()->getStatusCode());  // S'attendre à une redirection après la suppression
+
+        // Suivez la redirection et vérifiez que la tâche a été supprimée
+        $crawler = $this->client->followRedirect();
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+       // $this->assertStringNotContainsString('test', $this->client->getResponse()->getContent());
     }
 
     public function testEditTask()
     {
-        $userRepository = static::$container->get(UserRepository::class);
-        // Utilisez l'ID de la tâche spécifiée (37)
         $taskIdToEdit = 37;
-    
-        // Récupérez l'utilisateur de test
-       // $testUserFaild = $userRepository->findOneByEmail('edit@gmail.com');  // Ajustez l'e-mail pour correspondre à un utilisateur dans votre base de données
 
         // Simulez que $testUser est connecté
         $this->loginUser('edit@gmail.com', 'edit');
@@ -100,8 +125,5 @@ class TaskControllerTest extends WebTestCase
         $this->assertEquals(302, $this->client->getResponse()->getStatusCode());  // La soumission devrait vous rediriger
         $crawler = $this->client->followRedirect();
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());  // S'attendre à un 200 OK sur la nouvelle page
-    }
-    
-
-    
+    }  
 }

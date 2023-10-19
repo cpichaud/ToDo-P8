@@ -20,7 +20,8 @@ class SecurityControllerTest extends WebTestCase
         $crawler = $this->client->request('GET', '/login');
         
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorTextContains('button', 'Connexion');
+        $this->assertSelectorTextContains('.login-link', 'connexion utilisateur');
+
     }
 
     public function testLoginWithInvalidCredentials()

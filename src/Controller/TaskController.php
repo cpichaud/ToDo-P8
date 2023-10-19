@@ -51,7 +51,7 @@ class TaskController extends AbstractController
             if ($user) {
                 $task->setUser($user);
             }
-
+            $task->setCreateAt(new \DateTime());
             $this->entityManager->persist($task);
             $this->entityManager->flush();
 
@@ -66,41 +66,41 @@ class TaskController extends AbstractController
 
 
    /**
- * @Route("/tasks/{id}/edit", name="task_edit")
- */
-public function editAction(int $id, Request $request): Response
-{
-    $task = $this->entityManager->getRepository(Task::class)->find($id);
+     * @Route("/tasks/{id}/edit", name="task_edit")
+     */
+    public function editAction(int $id, Request $request): Response
+    {
+        $task = $this->entityManager->getRepository(Task::class)->find($id);
 
-    if (!$task) {
-        throw $this->createNotFoundException('Tâche non trouvée');
+        if (!$task) {
+            throw $this->createNotFoundException('Tâche non trouvée');
+        }
+
+        // Obtenez l'utilisateur connecté
+        $user = $this->getUser();
+
+        // Vérifiez si l'utilisateur connecté est l'auteur de la tâche ou un administrateur
+        if ($user !== $task->getUser() && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à modifier cette tâche');
+        }
+
+        $form = $this->createForm(TaskType::class, $task);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->flush();
+
+            $this->addFlash('success', 'La tâche a bien été modifiée.');
+
+            return $this->redirectToRoute('task_list');
+        }
+
+        return $this->render('task/edit.html.twig', [
+            'form' => $form->createView(),
+            'task' => $task,
+        ]);
     }
-
-    // Obtenez l'utilisateur connecté
-    $user = $this->getUser();
-
-    // Vérifiez si l'utilisateur connecté est l'auteur de la tâche ou un administrateur
-    if ($user !== $task->getUser() && !$this->isGranted('ROLE_ADMIN')) {
-        throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à modifier cette tâche');
-    }
-
-    $form = $this->createForm(TaskType::class, $task);
-
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        $this->entityManager->flush();
-
-        $this->addFlash('success', 'La tâche a bien été modifiée.');
-
-        return $this->redirectToRoute('task_list');
-    }
-
-    return $this->render('task/edit.html.twig', [
-        'form' => $form->createView(),
-        'task' => $task,
-    ]);
-}
 
 
     /**

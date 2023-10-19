@@ -14,7 +14,7 @@ class Task
     private ?int $id = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createAt = null;
+    private ?\DateTime $createAt = null;
 
     #[ORM\Column(length: 255)]
     private ?string $title = null;
@@ -47,12 +47,12 @@ class Task
         return $this->id;
     }
 
-    public function getCreateAt(): ?\DateTimeImmutable
+    public function getCreateAt(): ?\DateTime
     {
         return $this->createAt;
     }
 
-    public function setCreateAt(\DateTimeImmutable $createAt): static
+    public function setCreateAt(\DateTime $createAt): static
     {
         $this->createAt = $createAt;
 

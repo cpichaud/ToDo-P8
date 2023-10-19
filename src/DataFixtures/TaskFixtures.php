@@ -1,6 +1,7 @@
 <?php
 namespace App\DataFixtures;
 
+use DateTime;
 use App\Entity\Task;
 use App\Entity\User;
 use Doctrine\Persistence\ObjectManager;
@@ -34,7 +35,7 @@ class TaskFixtures extends Fixture implements DependentFixtureInterface
 
         for ($i = 0; $i < 10; $i++) {
             $task = new Task();
-            $task->setCreateAt(new \DateTimeImmutable());
+            $task->setCreateAt(new DateTime());
             
             // Choisir un titre et un contenu aléatoirement
             $task->setTitle($titles[array_rand($titles)]);
