@@ -22,14 +22,16 @@ class TaskController extends AbstractController
     {
         $this->entityManager = $entityManager;
     }
+
     /**
      * @Route("/", name="task_list")
      */
     public function listAction(): Response
     {
-        $tasks = $this->getDoctrine()->getRepository(Task::class)->findAll();
+        $tasks = $this->entityManager->getRepository(Task::class)->findAll();
         return $this->render('task/list.html.twig', ['tasks' => $tasks]);
     }
+
 
     /**
      * @Route("/tasks/create", name="task_create")
@@ -42,10 +44,16 @@ class TaskController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $task->setIsDone(false);
-            $em->persist($task);
-            $em->flush();
+
+            // Obtenez l'utilisateur connecté et associez-le à la tâche si un utilisateur est connecté
+            $user = $this->getUser();
+            if ($user) {
+                $task->setUser($user);
+            }
+
+            $this->entityManager->persist($task);
+            $this->entityManager->flush();
 
             $this->addFlash('success', 'La tâche a été bien été ajoutée.');
 
@@ -55,34 +63,45 @@ class TaskController extends AbstractController
         return $this->render('task/create.html.twig', ['form' => $form->createView()]);
     }
 
-    /**
-     * @Route("/tasks/{id}/edit", name="task_edit")
-     */
-    public function editAction(int $id, Request $request): Response
-    {
-        $task = $this->entityManager->getRepository(Task::class)->find($id);
 
-        if (!$task) {
-            throw $this->createNotFoundException('Tâche non trouvée');
-        }
 
-        $form = $this->createForm(TaskType::class, $task);
+   /**
+ * @Route("/tasks/{id}/edit", name="task_edit")
+ */
+public function editAction(int $id, Request $request): Response
+{
+    $task = $this->entityManager->getRepository(Task::class)->find($id);
 
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
-
-            $this->addFlash('success', 'La tâche a bien été modifiée.');
-
-            return $this->redirectToRoute('task_list');
-        }
-
-        return $this->render('task/edit.html.twig', [
-            'form' => $form->createView(),
-            'task' => $task,
-        ]);
+    if (!$task) {
+        throw $this->createNotFoundException('Tâche non trouvée');
     }
+
+    // Obtenez l'utilisateur connecté
+    $user = $this->getUser();
+
+    // Vérifiez si l'utilisateur connecté est l'auteur de la tâche ou un administrateur
+    if ($user !== $task->getUser() && !$this->isGranted('ROLE_ADMIN')) {
+        throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à modifier cette tâche');
+    }
+
+    $form = $this->createForm(TaskType::class, $task);
+
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'La tâche a bien été modifiée.');
+
+        return $this->redirectToRoute('task_list');
+    }
+
+    return $this->render('task/edit.html.twig', [
+        'form' => $form->createView(),
+        'task' => $task,
+    ]);
+}
+
 
     /**
      * @Route("/tasks/{id}/toggle", name="task_toggle")

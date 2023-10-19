@@ -2,26 +2,29 @@
 
 namespace App\Tests\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use App\Entity\Task;
+use App\Repository\UserRepository;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use App\Repository\TaskRepository;  // Ajoutez cette ligne
 
 class TaskControllerTest extends WebTestCase
 {
     private $client;
+    private $createdTaskId;
 
     protected function setUp(): void
     {
         $this->client = static::createClient([], ['debug' => true]);
     }
 
-    public function loginUser(): void
+    public function loginUser($username = 'admin@example.com', $password = 'adminpassword'): void
     {
         $crawler = $this->client->request('GET', '/login');
         $form = $crawler->selectButton('Connexion')->form();
-        $this->client->submit($form, ['username' => 'admin', 'password' => 'adminadmin']);
+        $this->client->submit($form, ['_username' => $username, '_password' => $password]);
     }
-
+    
+    
     public function testListTask()
     {
         $this->client->request('GET', '/');
@@ -30,73 +33,75 @@ class TaskControllerTest extends WebTestCase
 
     public function testCreateAction()
     {
-        // Accéder à la page de création
+        // 1. Authentification
+        $this->loginUser();
+        
+        // 2. Accéder à la page de création
         $crawler = $this->client->request('GET', '/tasks/create');
-        //$this->assertEquals(200, $this->client->getResponse()->getStatusCode());
-    
-        // Remplir le formulaire et le soumettre
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+        
+        // 3. Remplir le formulaire et le soumettre
         $form = $crawler->selectButton('Ajouter')->form();
         $form['task[title]'] = 'test';
         $form['task[content]'] = 'contenue';
+        $this->client->submit($form);  // Notez qu'il n'y a pas de champ 'task[user]' ici
+
+        // 4. Vérifications
+        $this->assertEquals(302, $this->client->getResponse()->getStatusCode());  // s'attendre à être redirigé
+        $crawler = $this->client->followRedirect();
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());  // s'attendre à un 200 OK sur la nouvelle page
+        
+        // // Récupération de l'URL de redirection pour extraire l'ID de la tâche créée
+        // $redirectUrl = $this->client->getResponse()->headers->get('Location');
+        // var_dump($redirectUrl);
+        // preg_match('/\/tasks\/(\d+)\/edit/', $redirectUrl, $matches);
+        // $this->createdTaskId = $matches[1];
+    }
+
+    public function testEditTask()
+    {
+        $userRepository = static::$container->get(UserRepository::class);
+        // Utilisez l'ID de la tâche spécifiée (37)
+        $taskIdToEdit = 37;
+    
+        // Récupérez l'utilisateur de test
+       // $testUserFaild = $userRepository->findOneByEmail('edit@gmail.com');  // Ajustez l'e-mail pour correspondre à un utilisateur dans votre base de données
+
+        // Simulez que $testUser est connecté
+        $this->loginUser('edit@gmail.com', 'edit');
+        $crawler = $this->client->request('GET', '/tasks/' . $taskIdToEdit . '/edit');
+        $this->assertEquals(403, $this->client->getResponse()->getStatusCode());
+    
+        // Maintenant, connectez-vous en tant qu'administrateur ou l'utilisateur qui a créé la tâche et essayez de modifier la tâche à nouveau
+        $this->loginUser();
+        
+    
+        // Récupérez l'utilisateur de test
+        // $testUser = $userRepository->findOneByEmail('admin@admin.com');  // Ajustez l'e-mail pour correspondre à un utilisateur dans votre base de données
+    
+        // // Simulez que $testUser est connecté
+        // $this->client->loginUser($testUser);
+    
+        $testAdmin = $this->loginUser('admin@example.com', 'adminpassword');
+        // Accédez à la page d'édition de la tâche (ajustez l'URL si nécessaire)
+        $crawler = $this->client->request('GET', '/tasks/' . $taskIdToEdit . '/edit');
+    
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
+    
+        // Remplissez le formulaire avec les nouvelles données
+        $form = $crawler->selectButton('Modifier')->form();
+        $form['task[title]'] = 'Titre modifié';
+        $form['task[content]'] = 'Contenu modifié';
+    
+        // Soumettez le formulaire
         $this->client->submit($form);
     
-        // S'attendre à être redirigé
-        $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
-    
-        // Suivre la redirection
+        // Vérifiez la redirection vers la page d'accueil
+        $this->assertEquals(302, $this->client->getResponse()->getStatusCode());  // La soumission devrait vous rediriger
         $crawler = $this->client->followRedirect();
-    
-        // S'attendre à un 200 OK sur la nouvelle page
-        $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
-    
-        // S'attendre à voir un message de succès sur la nouvelle page
-        //$this->assertEquals(1, $crawler->filter('div.alert-success')->count());
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());  // S'attendre à un 200 OK sur la nouvelle page
     }
     
 
-
-    // public function testCreateAction()
-    // {
-    //     $this->loginUser();
-
-    //     $crawler = $this->client->request('GET', '/users/create');
-    //     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
-
-    //     $form = $crawler->selectButton('Créer')->form();
-    //     $form['user[password][first]'] = 'testttt1234';
-    //     $form['user[password][second]'] = 'testttt1234';
-    //     $form['user[email]'] = 'autre@gmail.com';
-    //     $form['user[roles][0]']->tick();
-    //     $this->client->submit($form);
-
-    //     $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
-
-    //     $crawler = $this->client->followRedirect();
-
-    //     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
-    //     //$this->assertEquals(1, $crawler->filter('div.alert-success')->count());
-    // }
-
-    // public function testeditAction()
-    // {
-    //     $this->loginUser();
-
-    //     $crawler = $this->client->request('GET', '/users/1/edit');
-    //     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
-
-    //     $form = $crawler->selectButton('Modifier')->form();
-    //     $form['user[password][first]'] = 'edit';
-    //     $form['user[password][second]'] = 'edit';
-    //     $form['user[email]'] = 'edit@gmail.com';
-    //     $form['user[roles][0]']->tick();
-    //     $this->client->submit($form);
-
-    //     $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
-
-    //     $crawler = $this->client->followRedirect();
-
-    //     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
-    //     //$this->assertEquals(1, $crawler->filter('div.alert-success')->count());
-    // }
-
+    
 }

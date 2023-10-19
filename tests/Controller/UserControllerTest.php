@@ -4,7 +4,8 @@ namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use App\Entity\User;
-use App\Repository\UserRepository;  // Ajoutez cette ligne
+
+use App\Repository\UserRepository;
 
 class UserControllerTest extends WebTestCase
 {
