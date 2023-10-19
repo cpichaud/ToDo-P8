@@ -3,7 +3,10 @@
 
 namespace App\Tests\Controller;
 
+use App\Controller\SecurityController;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityControllerTest extends WebTestCase
 {
@@ -52,6 +55,25 @@ class SecurityControllerTest extends WebTestCase
         // Vérifier la redirection après une connexion réussie
         $this->assertResponseRedirects('http://localhost/');
     }
+
+    public function testLoginReturnsCorrectErrorMessage()
+    {
+        // Faites une requête GET à la page de login.
+        $crawler = $this->client->request('GET', '/login');
+
+        // Soumettez le formulaire de connexion avec des informations d'identification incorrectes.
+        $form = $crawler->selectButton('Connexion')->form();
+        $this->client->submit($form, ['_username' => 'nonexistent@example.com', '_password' => 'wrongpassword']);
+        
+        // Suivez la redirection (après une tentative de connexion infructueuse, vous devriez être redirigé vers la page de login à nouveau).
+        $crawler = $this->client->followRedirect();
+
+        // Vérifiez que le message d'erreur est présent dans la réponse.
+        $this->assertStringContainsString('Identifiants invalides.', $this->client->getResponse()->getContent());
+    }
+
+
+
 
 }
 

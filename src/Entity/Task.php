@@ -23,7 +23,7 @@ class Task
     private ?string $content = null;
 
     #[ORM\Column]
-    private ?bool $isDone = null;
+    private ?bool $isDone = false;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: "tasks")]
     #[ORM\JoinColumn(name: "user_id", referencedColumnName: "id")]

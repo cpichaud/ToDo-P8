@@ -2,10 +2,9 @@
 
 namespace App\Tests\Controller;
 
-use App\Entity\Task;
-use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use App\Repository\TaskRepository;  // Ajoutez cette ligne
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+
 
 class TaskControllerTest extends WebTestCase
 {
@@ -26,17 +25,7 @@ class TaskControllerTest extends WebTestCase
     public function logoutUser(): void
     {
         $this->client->request('GET', '/logout'); 
-    }
-
-    // public function testDisplayLoginPage()
-    // {
-    //     $this->logoutUser();  // Assurez-vous que l'utilisateur est déconnecté.
-    //     $crawler = $this->client->request('GET', '/login');
-    //     dump($this->client->getResponse()->getContent());  // Ajoutez cette ligne
-    //     $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
-    //     $this->assertSelectorTextContains('button', 'Connexion');
-    // }
-    
+    }    
     
     public function testListTask()
     {
@@ -60,18 +49,9 @@ class TaskControllerTest extends WebTestCase
         $this->client->submit($form);  // Notez qu'il n'y a pas de champ 'task[user]' ici
 
         // 4. Vérifications
-        $this->assertEquals(302, $this->client->getResponse()->getStatusCode());  // s'attendre à être redirigé
+        $this->assertEquals(302, $this->client->getResponse()->getStatusCode());
         $crawler = $this->client->followRedirect();
-        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());  // s'attendre à un 200 OK sur la nouvelle page
-        
-        // // Récupération de l'URL de redirection pour extraire l'ID de la tâche créée
-        // $redirectUrl = $this->client->getResponse()->headers->get('Location');
-        // var_dump($redirectUrl);
-        // preg_match('/\/tasks\/(\d+)\/edit/', $redirectUrl, $matches);
-        // $this->createdTaskId = $matches[1];  $taskRepository = static::$container->get(TaskRepository::class);
-        // $taskRepository = static::$container->get(TaskRepository::class);
-        // $createdTask = $taskRepository->findOneBy(['title' => 'test']);  // Vous pouvez utiliser d'autres critères si nécessaire
-        // $this->createdTaskId = $createdTask->getId();
+        $this->assertEquals(200, $this->client->getResponse()->getStatusCode());
     }
 
     public function testDeleteTask()
@@ -79,7 +59,7 @@ class TaskControllerTest extends WebTestCase
         $this->loginUser();  // Authentifiez-vous en tant qu'admin ou l'utilisateur qui a créé la tâche
 
         // Supprimez la tâche
-        $this->client->request('GET', '/tasks/65/delete');
+        $this->client->request('GET', '/tasks/82/delete');
         $this->assertEquals(302, $this->client->getResponse()->getStatusCode());  // S'attendre à une redirection après la suppression
 
         // Suivez la redirection et vérifiez que la tâche a été supprimée
