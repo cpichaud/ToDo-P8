@@ -15,7 +15,6 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class TaskController extends AbstractController
 {
-
     private $entityManager;
 
     public function __construct(EntityManagerInterface $entityManager)
@@ -32,7 +31,6 @@ class TaskController extends AbstractController
         return $this->render('task/list.html.twig', ['tasks' => $tasks]);
     }
 
-
     /**
      * @Route("/tasks/create", name="task_create")
      */
@@ -46,7 +44,7 @@ class TaskController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $task->setIsDone(false);
 
-            // Obtenez l'utilisateur connecté et associez-le à la tâche si un utilisateur est connecté
+            // Get the currently logged-in user and associate it with the task if a user is logged in
             $user = $this->getUser();
             if ($user) {
                 $task->setUser($user);
@@ -63,9 +61,7 @@ class TaskController extends AbstractController
         return $this->render('task/create.html.twig', ['form' => $form->createView()]);
     }
 
-
-
-   /**
+    /**
      * @Route("/tasks/{id}/edit", name="task_edit")
      */
     public function editAction(int $id, Request $request): Response
@@ -76,10 +72,10 @@ class TaskController extends AbstractController
             throw $this->createNotFoundException('Tâche non trouvée');
         }
 
-        // Obtenez l'utilisateur connecté
+        // Get the currently logged-in user
         $user = $this->getUser();
 
-        // Vérifiez si l'utilisateur connecté est l'auteur de la tâche ou un administrateur
+        // Check if the logged-in user is the author of the task or an administrator
         if ($user !== $task->getUser() && !$this->isGranted('ROLE_ADMIN')) {
             throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à modifier cette tâche');
         }
@@ -102,7 +98,6 @@ class TaskController extends AbstractController
         ]);
     }
 
-
     /**
      * @Route("/tasks/{id}/toggle", name="task_toggle")
      */
@@ -122,7 +117,6 @@ class TaskController extends AbstractController
         return $this->redirectToRoute('task_list');
     }
 
-
     /**
      * @Route("/tasks/{id}/delete", name="task_delete")
      */
@@ -133,29 +127,26 @@ class TaskController extends AbstractController
             if (!$currentUser) {
                 throw new AccessDeniedException('Vous devez être connecté pour accéder à cette fonctionnalité.');
             }
-            
+
             $task = $this->entityManager->getRepository(Task::class)->find($id);
-    
+
             if (!$task) {
                 throw $this->createNotFoundException('Tâche non trouvée');
             }
-    
-            
+
             if ($currentUser !== $task->getUser() && !$currentUser->hasRole('ROLE_ADMIN')) {
                 throw new AccessDeniedException('Vous ne pouvez pas supprimer cette tâche.');
             }
-    
+
             $this->entityManager->remove($task);
             $this->entityManager->flush();
-    
+
             $this->addFlash('success', 'La tâche a bien été supprimée.');
-    
+
             return $this->redirectToRoute('task_list');
         } catch (AuthenticationException $e) {
             $this->addFlash('error', 'Vous devez être connecté pour accéder à cette fonctionnalité.');
             return $this->redirectToRoute('login_route_name');
         }
-        
-      
     }
 }
