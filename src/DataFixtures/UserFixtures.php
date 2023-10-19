@@ -6,13 +6,13 @@ use App\Entity\User;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\DBAL\Driver\IBMDB2\Exception\Factory;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFixtures extends Fixture
 {
     private $passwordEncoder;
 
-    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
+    public function __construct(UserPasswordHasherInterface $passwordEncoder)
     {
         $this->passwordEncoder = $passwordEncoder;
     }
@@ -26,7 +26,7 @@ class UserFixtures extends Fixture
         for ($i = 0; $i < 5; $i++) {
             $user = new User();
             $user->setEmail($faker->email);
-            $user->setPassword($this->passwordEncoder->encodePassword($user, 'password')); // même mot de passe pour tous
+            $user->setPassword($this->passwordEncoder->hashPassword($user, 'password')); // même mot de passe pour tous
             $user->setRoles(['ROLE_USER']);
 
             $manager->persist($user);
@@ -35,7 +35,7 @@ class UserFixtures extends Fixture
         // Créez un utilisateur admin
         $admin = new User();
         $admin->setEmail('admin@example.com');
-        $admin->setPassword($this->passwordEncoder->encodePassword($admin, 'adminpassword'));
+        $admin->setPassword($this->passwordEncoder->hashPassword($admin, 'adminpassword'));
         $admin->setRoles(['ROLE_ADMIN']);
 
         $manager->persist($admin);

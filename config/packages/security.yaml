@@ -25,8 +25,9 @@ security:
                 target: app_login
 
     access_control:
-        - { path: ^/$, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/$, roles: PUBLIC_ACCESS }
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/tasks/create, roles: PUBLIC_ACCESS }
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
 
