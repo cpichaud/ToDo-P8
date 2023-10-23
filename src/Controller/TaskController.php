@@ -3,11 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Task;
+use App\Entity\User;
 use App\Form\TaskType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
@@ -38,26 +40,28 @@ class TaskController extends AbstractController
     {
         $task = new Task();
         $form = $this->createForm(TaskType::class, $task);
-
+    
         $form->handleRequest($request);
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
             $task->setIsDone(false);
-
-            // Get the currently logged-in user and associate it with the task if a user is logged in
             $user = $this->getUser();
-            if ($user) {
+    
+            if ($user instanceof UserInterface) {
                 $task->setUser($user);
+            } else {
+                $userAnonyme = $this->entityManager->getRepository(User::class)->findOneBy(['email' => 'anonyme@example.com']);
+                $task->setUser($userAnonyme);
             }
+    
             $task->setCreateAt(new \DateTime());
             $this->entityManager->persist($task);
             $this->entityManager->flush();
-
+    
             $this->addFlash('success', 'La tâche a été bien été ajoutée.');
-
+    
             return $this->redirectToRoute('task_list');
         }
-
         return $this->render('task/create.html.twig', ['form' => $form->createView()]);
     }
 
@@ -135,7 +139,8 @@ class TaskController extends AbstractController
             }
 
             if ($currentUser !== $task->getUser() && !$currentUser->hasRole('ROLE_ADMIN')) {
-                throw new AccessDeniedException('Vous ne pouvez pas supprimer cette tâche.');
+                $this->addFlash('danger', 'Vous ne pouvez pas supprimer cette tâche.');
+                return $this->redirectToRoute('task_list');
             }
 
             $this->entityManager->remove($task);

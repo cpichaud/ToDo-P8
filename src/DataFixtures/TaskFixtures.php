@@ -8,6 +8,9 @@ use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 
+/**
+ * @codeCoverageIgnore
+ */
 class TaskFixtures extends Fixture implements DependentFixtureInterface
 {
     // ... le reste de votre code ...
