@@ -56,7 +56,7 @@ class TaskControllerTest extends WebTestCase
         $this->loginUser();
 
         // Supprimez la tâche
-        $this->client->request('GET', '/tasks/82/delete');
+        $this->client->request('GET', '/tasks/84/delete');
         $this->assertEquals(302, $this->client->getResponse()->getStatusCode()); // S'attendre à une redirection après la suppression
 
         // Suivez la redirection et vérifiez que la tâche a été supprimée
