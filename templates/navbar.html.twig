@@ -15,6 +15,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ path('user_list') }}">Liste des utilisateurs</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ path('user_create') }}">Création d'un utilisateur</a>
+                </li>
             {% endif %}
             <!-- Affichage conditionnel selon l'état de connexion de l'utilisateur -->
             {% if app.user %}

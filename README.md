@@ -1,5 +1,7 @@
 # ToDo-P8
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/3d3cde78f5874a51aa7e734e872d2e34)](https://app.codacy.com/gh/cpichaud/ToDo-P8/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+
 ## Configuration 
 
 - MySQL / MariaDB
