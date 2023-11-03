@@ -17,8 +17,16 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class TaskController extends AbstractController
 {
+    /**
+     * @var EntityManagerInterface
+     */
     private $entityManager;
 
+    /**
+     * TaskController constructor.
+     *
+     * @param EntityManagerInterface $entityManager
+     */
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
@@ -26,6 +34,8 @@ class TaskController extends AbstractController
 
     /**
      * @Route("/", name="task_list")
+     *
+     * @return Response
      */
     public function listAction(): Response
     {
@@ -35,51 +45,57 @@ class TaskController extends AbstractController
 
     /**
      * @Route("/tasks/create", name="task_create")
+     *
+     * @param Request $request
+     * @return Response
      */
     public function createAction(Request $request): Response
     {
         $task = new Task();
         $form = $this->createForm(TaskType::class, $task);
-    
+
         $form->handleRequest($request);
-    
+
         if ($form->isSubmitted() && $form->isValid()) {
             $task->setIsDone(false);
             $user = $this->getUser();
-    
+
             if ($user instanceof UserInterface) {
                 $task->setUser($user);
             } else {
                 $userAnonyme = $this->entityManager->getRepository(User::class)->findOneBy(['email' => 'anonyme@example.com']);
                 $task->setUser($userAnonyme);
             }
-    
+
             $task->setCreateAt(new \DateTime());
             $this->entityManager->persist($task);
             $this->entityManager->flush();
-    
+
             $this->addFlash('success', 'La tâche a été bien été ajoutée.');
-    
+
             return $this->redirectToRoute('task_list');
         }
+
         return $this->render('task/create.html.twig', ['form' => $form->createView()]);
     }
 
     /**
-     * @Route("/tasks/{id}/edit", name="task_edit")
+     * @Route("/tasks/{taskId}/edit", name="task_edit")
+     *
+     * @param int $taskId
+     * @param Request $request
+     * @return Response
      */
-    public function editAction(int $id, Request $request): Response
+    public function editAction(int $taskId, Request $request): Response
     {
-        $task = $this->entityManager->getRepository(Task::class)->find($id);
+        $task = $this->entityManager->getRepository(Task::class)->find($taskId);
 
-        if (!$task) {
+        if ($task === null) {
             throw $this->createNotFoundException('Tâche non trouvée');
         }
 
-        // Get the currently logged-in user
         $user = $this->getUser();
 
-        // Check if the logged-in user is the author of the task or an administrator
         if ($user !== $task->getUser() && !$this->isGranted('ROLE_ADMIN')) {
             throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à modifier cette tâche');
         }
@@ -103,13 +119,16 @@ class TaskController extends AbstractController
     }
 
     /**
-     * @Route("/tasks/{id}/toggle", name="task_toggle")
+     * @Route("/tasks/{taskId}/toggle", name="task_toggle")
+     *
+     * @param int $taskId
+     * @return Response
      */
-    public function toggleTaskAction(int $id): Response
+    public function toggleTaskAction(int $taskId): Response
     {
-        $task = $this->entityManager->getRepository(Task::class)->find($id);
+        $task = $this->entityManager->getRepository(Task::class)->find($taskId);
 
-        if (!$task) {
+        if ($task === null) {
             throw $this->createNotFoundException('Tâche non trouvée');
         }
 
@@ -122,19 +141,23 @@ class TaskController extends AbstractController
     }
 
     /**
-     * @Route("/tasks/{id}/delete", name="task_delete")
+     * @Route("/tasks/{taskId}/delete", name="task_delete")
+     *
+     * @param int $taskId
+     * @return Response
      */
-    public function deleteTaskAction(int $id): Response
+    public function deleteTaskAction(int $taskId): Response
     {
         try {
             $currentUser = $this->getUser();
-            if (!$currentUser) {
+
+            if ($currentUser === null) {
                 throw new AccessDeniedException('Vous devez être connecté pour accéder à cette fonctionnalité.');
             }
 
-            $task = $this->entityManager->getRepository(Task::class)->find($id);
+            $task = $this->entityManager->getRepository(Task::class)->find($taskId);
 
-            if (!$task) {
+            if ($task === null) {
                 throw $this->createNotFoundException('Tâche non trouvée');
             }
 
@@ -152,6 +175,6 @@ class TaskController extends AbstractController
         } catch (AuthenticationException $e) {
             $this->addFlash('error', 'Vous devez être connecté pour accéder à cette fonctionnalité.');
             return $this->redirectToRoute('login_route_name');
-        }
+        } //end try
     }
 }
