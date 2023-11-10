@@ -56,7 +56,7 @@ class TaskControllerTest extends WebTestCase
         $this->loginUser();
 
         // Supprimez la tâche
-        $this->client->request('GET', '/tasks/84/delete');
+        $this->client->request('GET', '/tasks/86/delete');
         $this->assertEquals(302, $this->client->getResponse()->getStatusCode()); // S'attendre à une redirection après la suppression
 
         // Suivez la redirection et vérifiez que la tâche a été supprimée
@@ -75,7 +75,7 @@ class TaskControllerTest extends WebTestCase
         $this->loginUser();
         $testAdmin = $this->loginUser('admin@example.com', 'adminpassword');
         
-        // Accédez à la page d'édition de la tâche (ajustez l'URL si nécessaire)
+        // Accédez à la page d'édition de la tâche
         $crawler = $this->client->request('GET', '/tasks/' . $taskIdToEdit . '/edit');
 
         $this->assertEquals(200, $this->client->getResponse()->getStatusCode());

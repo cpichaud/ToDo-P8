@@ -65,7 +65,6 @@ class SecurityControllerTest extends WebTestCase
         $form = $crawler->selectButton('Connexion')->form();
         $this->client->submit($form, ['_username' => 'nonexistent@example.com', '_password' => 'wrongpassword']);
         
-        // Suivez la redirection (après une tentative de connexion infructueuse, vous devriez être redirigé vers la page de login à nouveau).
         $crawler = $this->client->followRedirect();
 
         // Vérifiez que le message d'erreur est présent dans la réponse.

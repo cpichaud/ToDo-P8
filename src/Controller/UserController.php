@@ -45,8 +45,6 @@ class UserController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $password = $this->passwordEncoder->hashPassword($user, $user->getPassword());
             $user->setPassword($password);
-            // dump($user->getRoles());
-            // die();
 
             $this->entityManager->persist($user);
             $this->entityManager->flush();
@@ -70,7 +68,7 @@ class UserController extends AbstractController
             throw $this->createNotFoundException('Utilisateur non trouvé');
         }
 
-        $form = $this->createForm(UserType::class, $user);
+        $form = $this->createForm(UserType::class, $user, ['is_edit' => true]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
