@@ -19,11 +19,11 @@ class UserType extends AbstractType
                 'attr' => ['class' => 'form-control'],
                 'label' => 'Adresse Email'
             ])
-            ->add('password', RepeatedType::class, [
-                'type' => PasswordType::class,
-                'first_options' => ['label' => 'Mot de passe', 'attr' => ['class' => 'form-control']],
-                'second_options' => ['label' => 'Répétez le mot de passe', 'attr' => ['class' => 'form-control']],
-            ])
+            // ->add('password', RepeatedType::class, [
+            //     'type' => PasswordType::class,
+            //     'first_options' => ['label' => 'Mot de passe', 'attr' => ['class' => 'form-control']],
+            //     'second_options' => ['label' => 'Répétez le mot de passe', 'attr' => ['class' => 'form-control']],
+            // ])
             ->add('roles', ChoiceType::class, [
                 'choices' => [
                     'Utilisateur' => 'ROLE_USER',
@@ -33,12 +33,21 @@ class UserType extends AbstractType
                 'multiple' => true,
                 'label' => 'Rôles'
             ]);
+
+            if (!$options['is_edit']) {
+                $builder->add('password', RepeatedType::class, [
+                    'type' => PasswordType::class,
+                    'first_options' => ['label' => 'Mot de passe', 'attr' => ['class' => 'form-control']],
+                    'second_options' => ['label' => 'Répétez le mot de passe', 'attr' => ['class' => 'form-control']],
+                ]);
+            };
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => User::class,
+            'is_edit' => false,
         ]);
     }
 }

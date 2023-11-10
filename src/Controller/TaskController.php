@@ -175,6 +175,6 @@ class TaskController extends AbstractController
         } catch (AuthenticationException $e) {
             $this->addFlash('error', 'Vous devez être connecté pour accéder à cette fonctionnalité.');
             return $this->redirectToRoute('login_route_name');
-        } //end try
+        }
     }
 }
