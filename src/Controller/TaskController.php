@@ -43,41 +43,39 @@ class TaskController extends AbstractController
         return $this->render('task/list.html.twig', ['tasks' => $tasks]);
     }
 
-    /**
-     * @Route("/tasks/create", name="task_create")
-     *
-     * @param Request $request
-     * @return Response
-     */
-    public function createAction(Request $request): Response
-    {
-        $task = new Task();
-        $form = $this->createForm(TaskType::class, $task);
+   /**
+ * @Route("/tasks/create", name="task_create")
+ *
+ * @param Request $request
+ * @return Response
+ */
+public function createAction(Request $request): Response
+{
+    $user = $this->getUser();
 
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $task->setIsDone(false);
-            $user = $this->getUser();
-
-            if ($user instanceof UserInterface) {
-                $task->setUser($user);
-            } else {
-                $userAnonyme = $this->entityManager->getRepository(User::class)->findOneBy(['email' => 'anonyme@example.com']);
-                $task->setUser($userAnonyme);
-            }
-
-            $task->setCreateAt(new \DateTime());
-            $this->entityManager->persist($task);
-            $this->entityManager->flush();
-
-            $this->addFlash('success', 'La tâche a été bien été ajoutée.');
-
-            return $this->redirectToRoute('task_list');
-        }
-
-        return $this->render('task/create.html.twig', ['form' => $form->createView()]);
+    if (!$user instanceof UserInterface) {
+        return $this->redirectToRoute('app_login');
     }
+
+    $task = new Task();
+    $form = $this->createForm(TaskType::class, $task);
+
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $task->setIsDone(false);
+        $task->setUser($user);
+        $task->setCreateAt(new \DateTime());
+        $this->entityManager->persist($task);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'La tâche a été bien été ajoutée.');
+
+        return $this->redirectToRoute('task_list');
+    }
+
+    return $this->render('task/create.html.twig', ['form' => $form->createView()]);
+}
 
     /**
      * @Route("/tasks/{taskId}/edit", name="task_edit")
